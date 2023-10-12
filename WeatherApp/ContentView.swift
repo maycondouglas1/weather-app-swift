@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isNight =  false
+    
     struct WeatherItem {
         let day: String
         let iconName: String
@@ -24,27 +26,12 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            BackgroundView(topColor: .blue, bottomColor: Color("lightBlue"))
+            BackgroundView(isNight: isNight)
             
             VStack {
-                Text("São Cristóvão - SE")
-                    .font(.system(size: 32, weight: .medium, design: .default))
-                    .foregroundStyle(.white)
-                    .padding()
+                CityTextView(cityText: "São Cristóvão - SE")
                 
-                VStack(spacing: 8) {
-                    Image(systemName: "cloud.sun.fill")
-                        .renderingMode(.original)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 180, height: 180)
-                    
-                    Text("30°")
-                        .font(.system(size: 70, weight: .medium))
-                        .foregroundStyle(.white)
-                    
-                }
-                .padding(.bottom, 40)
+                MainWeatherStatusView(iconName: isNight ? "moon.stars.fill" : "cloud.sun.fill", temperature: 30)
                 
                 HStack(spacing: 20) {
                     ForEach(weatherData, id: \.day) { weatherItem in
@@ -59,13 +46,13 @@ struct ContentView: View {
                 Spacer()
                 
                 Button {
-                    print("clicado")
+                    isNight.toggle()
                 } label: {
-                    Text("Change Day Time")
-                        .frame(width: 280, height: 50)
-                        .background(Color.white)
-                        .font(.system(size: 20, weight: .bold, design: .default))
-                        .cornerRadius(10)
+                    WeatherButton(
+                        title: "Change Day Time",
+                        backgroundColor: .white,
+                        textColor: Color.blue
+                    )
                 }
                 
                 Spacer()
@@ -93,7 +80,7 @@ struct WeatherDayView: View {
                 .foregroundColor(.white)
             
             Image(systemName: iconName)
-                .renderingMode(.original)
+                .symbolRenderingMode(.multicolor)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 50, height: 50)
@@ -106,13 +93,46 @@ struct WeatherDayView: View {
 }
 
 struct BackgroundView: View {
-    var topColor: Color
-    var bottomColor: Color
+    var isNight: Bool
     
     var body: some View {
-        LinearGradient(gradient: Gradient(colors: [topColor, bottomColor]),
+        LinearGradient(gradient: Gradient(colors: [isNight ? .black : .blue, isNight ? .gray : Color("lightBlue") ]),
                        startPoint: .topLeading,
                        endPoint: .bottomTrailing)
-        .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+        .ignoresSafeArea()
     }
 }
+
+struct CityTextView: View {
+    var cityText: String
+    
+    var body: some View {
+        Text(cityText)
+            .font(.system(size: 32, weight: .medium, design: .default))
+            .foregroundStyle(.white)
+            .padding()
+    }
+}
+
+struct MainWeatherStatusView: View {
+    var iconName: String
+    var temperature: Int
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: iconName)
+                .renderingMode(.original)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 180, height: 180)
+            
+            Text("\(temperature)°")
+                .font(.system(size: 70, weight: .medium))
+                .foregroundStyle(.white)
+            
+        }
+        .padding(.bottom, 40)
+    }
+}
+
+
